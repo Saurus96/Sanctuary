@@ -17,3 +17,20 @@ sk-*
 
 # DeepSeek reasoner file
 deepseek-reasoner
+# Large binary folders (models, server builds)
+Models/
+llama-b8929/
+sanctuary-main/
+
+# Local personal files and logs
+Versions/
+Errors/
+Dot_env/
+Docs/.obsidian/
+App/launcher.txt
+App/Sanctuary3.md
+
+# Prevent API key leaks
+sk-*
+DEEPSEEK_API_KEY*
+deepseek-reasoner
