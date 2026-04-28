@@ -10,3 +10,7 @@ dot_env/
 # Obsidian workspace
 .obsidian/
 .aider*
+
+# Prevent accidental API key exposure
+DEEPSEEK_API_KEY*
+sk-*
