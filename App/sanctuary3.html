@@ -1252,8 +1252,6 @@ async function sendMessage() {
 async function performFirstBoot() {
   if (localStorage.getItem('sanctuary_booted')) return;
   if (!db) return;
-  // Show manual
-  addDocumentBubble('manual', MANUAL_TEXT);
 
   // seed call
   try {
@@ -1519,12 +1517,6 @@ function chunkAndEmbed(docName, text, ragStore) {
     } catch (e) { console.warn('Chunk embedding failed:', e); }
   });
 }
-
-// ===================== EVENT LISTENERS =====================
-sendBtn.addEventListener('click', sendMessage);
-userInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') sendMessage();
-});
 
 // ===================== EVENT LISTENERS =====================
 sendBtn.addEventListener('click', sendMessage);
