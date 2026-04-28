@@ -9,3 +9,4 @@ dot_env/
 
 # Obsidian workspace
 .obsidian/
+.aider*
