@@ -14,3 +14,6 @@ dot_env/
 # Prevent accidental API key exposure
 DEEPSEEK_API_KEY*
 sk-*
+
+# DeepSeek reasoner file
+deepseek-reasoner
