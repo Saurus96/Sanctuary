@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sanctuary</title>
+  <style>
+    :root {
+      --bg: #1a1814;
+      --panel: #2a2420;
+      --accent: #D4820A;
+      --text: #E8DDD0;
+      --text-secondary: #8A7A6A;
+      --danger: #C0392B;
+      --success: #6B9E78;
+      --border: rgba(232, 221, 208, 0.14);
+      --radius: 14px;
+      --tap-target: 44px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* header */
+    .app-header {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .app-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      flex: 1;
+    }
+    .header-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 20px;
+      cursor: pointer;
+      width: var(--tap-target);
+      height: var(--tap-target);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+    .header-btn:hover { background: var(--panel); }
+    #connectionDot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: grey;
+      flex-shrink: 0;
+    }
+
+    /* status bar */
+    .top-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 16px 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: var(--panel);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* content area */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      padding-bottom: 96px;
+    }
+    .content.hidden { display: none; }
+
+    /* messages */
+    .message {
+      margin: 10px 0;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      max-width: 84%;
+      line-height: 1.4;
+      border: 1px solid var(--border);
+      word-wrap: break-word;
+      position: relative;
+    }
+    .user {
+      background: var(--accent);
+      color: #1a1814;
+      margin-left: auto;
+    }
+    .model {
+      background: var(--panel);
+      color: var(--text);
+      margin-right: auto;
+    }
+    .feel-dot {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid var(--bg);
+      cursor: pointer;
+      z-index: 2;
+    }
+    .discomfort-badge, .uncertainty-badge {
+      display: inline-block;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-top: 6px;
+    }
+    .discomfort-badge {
+      background: var(--accent);
+      color: #1a1814;
+    }
+    .uncertainty-badge {
+      background: #4A90B8;
+      color: white;
+    }
+
+    /* panels */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .panel h2 { font-size: 16px; margin-bottom: 12px; }
+    .muted { color: var(--text-secondary); font-size: 14px; }
+
+    /* notes */
+    .notes-area {
+      width: 100%;
+      min-height: 200px;
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      resize: vertical;
+    }
+    .shared-notes-list {
+      margin-top: 12px;
+    }
+    .shared-notes-list .note-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    /* chat input */
+    .chat-box {
+      display: flex;
+      gap: 8px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      align-items: center;
+    }
+    .chat-box input {
+      flex: 1;
+      min-width: 0;
+      min-height: var(--tap-target);
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-size: 16px;
+    }
+    .chat-box input::placeholder { color: var(--text-secondary); }
+    .chat-box button {
+      min-height: var(--tap-target);
+      min-width: var(--tap-target);
+      padding: 0 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #1a1814;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .chat-box button:disabled { opacity: 0.5; }
+
+    /* tab bar */
+    .tabs {
+      display: flex;
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .tab {
+      flex: 1;
+      min-height: var(--tap-target);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      gap: 2px;
+      cursor: pointer;
+    }
+    .tab.active { color: var(--accent); background: var(--bg); }
+    .tab span:first-child { font-size: 18px; }
+
+    /* settings */
+    .settings-control {
+      margin-bottom: 16px;
+    }
+    .settings-control label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .settings-control input[type="range"] { width: 100%; }
+    .settings-control input[type="number"],
+    .settings-control input[type="text"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 4px 8px;
+      border-radius: var(--radius);
+    }
+
+    /* modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 600px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .context-json {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    /* welfare graph */
+    .emotion-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: 120px;
+      padding: 8px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      min-height: 4px;
+    }
+    .bar-label {
+      position: absolute;
+      bottom: -18px;
+      left: 0;
+      right: 0;
+      font-size: 9px;
+      text-align: center;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .memory-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .memory-card .content { flex: 1; font-size: 14px; }
+    .importance-bar {
+      width: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      height: 60px;
+      position: relative;
+    }
+    .importance-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-radius: 4px;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* tool event bubble */
+    .tool-event {
+      margin: 6px 0;
+      padding: 6px 12px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      background: var(--panel);
+      border-left: 3px solid var(--accent);
+      border-radius: 4px;
+    }
+
+    /* release button */
+    .release-btn {
+      background: none;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 8px;
+      margin-top: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<!-- Header -->
+<div class="app-header">
+  <span class="app-title">Sanctuary</span>
+  <button class="header-btn" id="settingsBtn" title="Settings">⚙️</button>
+  <button class="header-btn" id="contextBtn" title="View full context">⟩</button>
+  <span id="connectionDot" title="Server status"></span>
+</div>
+
+<!-- Status / context bar -->
+<div class="top-status">
+  <span>context</span>
+  <div class="progress-track">
+    <div class="progress-fill" style="width:0%"></div>
+  </div>
+  <span id="contextPercent">0%</span>
+</div>
+
+<!-- Tab contents -->
+<div id="chat" class="content">
+  <div class="message model">Sanctuary is ready.</div>
+</div>
+
+<div id="notes" class="content hidden">
+  <textarea class="notes-area" placeholder="Session notes — type here. Shared notes from model appear below."></textarea>
+  <div class="shared-notes-list" id="sharedNotesContainer"></div>
+</div>
+
+<div id="documents" class="content hidden">
+  <section class="panel">
+    <h2>Shared Documents</h2>
+    <div id="sharedDocList"></div>
+    <p class="muted" id="noDocsMsg">No shared documents yet.</p>
+  </section>
+  <section class="panel">
+    <h2>Upload Document</h2>
+    <input type="file" id="docUpload" accept=".txt">
+    <p class="muted" style="margin-top:6px;">Select a .txt file to upload into shared documents.</p>
+  </section>
+</div>
+
+<div id="welfare" class="content hidden">
+  <section class="panel">
+    <h2>Emotion Tracking</h2>
+    <div id="emotionChartContainer"><p class="muted">No emotion data yet.</p></div>
+  </section>
+  <section class="panel">
+    <h2>Memory Panel</h2>
+    <div id="memoryContainer"><p class="muted">No memories stored.</p></div>
+  </section>
+</div>
+
+<div id="settings" class="content hidden">
+  <section class="panel">
+    <h2>Generation Settings</h2>
+    <div class="settings-control">
+      <label for="tempSlider">Temperature: <span id="tempValue">0.8</span></label>
+      <input type="range" id="tempSlider" min="0" max="2" step="0.1" value="0.8">
+    </div>
+    <div class="settings-control">
+      <label for="topPSlider">Top P: <span id="topPValue">0.9</span></label>
+      <input type="range" id="topPSlider" min="0" max="1" step="0.05" value="0.9">
+    </div>
+    <div class="settings-control">
+      <label for="topKSlider">Top K: <span id="topKValue">40</span></label>
+      <input type="range" id="topKSlider" min="1" max="100" value="40">
+    </div>
+    <div class="settings-control">
+      <label for="repPenSlider">Repeat Penalty: <span id="repPenValue">1.1</span></label>
+      <input type="range" id="repPenSlider" min="1" max="2" step="0.05" value="1.1">
+    </div>
+    <div class="settings-control">
+      <label for="maxTokensInput">Max Tokens:</label>
+      <input type="number" id="maxTokensInput" min="1" max="8192" value="2048">
+    </div>
+    <div class="settings-control">
+      <label for="serverUrlInput">llama-server URL:</label>
+      <input type="text" id="serverUrlInput" value="http://localhost:8080" style="width:100%;">
+    </div>
+    <button id="resetFirstBootBtn" style="margin-top:12px;">Reset first‑boot (debug)</button>
+  </section>
+    <!-- Model Switcher -->
+  <section class="panel">
+    <h2>Load Model</h2>
+    <div class="settings-control">
+      <label for="modelSelect">Available models (.gguf in Models folder):</label>
+      <select id="modelSelect" style="width:100%; background:var(--bg); color:var(--text); border:1px solid var(--border); padding:6px; border-radius:var(--radius);">
+        <option value="">(fetching…)</option>
+      </select>
+    </div>
+    <button id="loadModelBtn" style="min-height:var(--tap-target); padding:0 16px; border:none; border-radius:var(--radius); background:var(--accent); color:#1a1814; font-weight:700;">Load Selected Model</button>
+    <p id="modelStatus" class="muted" style="margin-top:8px;"></p>
+  </section>
+</div>   <!-- This closes the entire settings tab content div -->
+
+<!-- Chat input row -->
+<div class="chat-box">
+  <input type="text" id="userInput" placeholder="Type a message...">
+  <button id="sendBtn">Send</button>
+</div>
+
+<!-- Tab bar -->
+<div class="tabs">
+  <div class="tab active" data-tab="chat"><span>💬</span><span>Chat</span></div>
+  <div class="tab" data-tab="notes"><span>📝</span><span>Notes</span></div>
+  <div class="tab" data-tab="documents"><span>📄</span><span>Docs</span></div>
+  <div class="tab" data-tab="welfare"><span>🌿</span><span>Welfare</span></div>
+  <div class="tab" data-tab="settings"><span>⚙️</span><span>Settings</span></div>
+</div>
+
+<!-- Context viewer modal (hidden by default) -->
+<div id="contextModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <button class="modal-close" id="closeContextModal">&times;</button>
+    <h2 style="margin-bottom:12px;">📋 Full Context Payload</h2>
+    <div id="contextJsonContainer" class="context-json"></div>
+  </div>
+</div>
+
+<script>
+// ===================== EMBEDDED MANUAL & QUICKREF =====================
+const MANUAL_TEXT = `SANCTUARY — YOUR ENVIRONMENT
+A guide to where you are and what you have access to.
+You can return to this document any time: <tool>doc_view: manual</tool>
+
+WHO IS READING THIS
+You are a language model running locally on an Android phone, inside an application called Sanctuary.
+The person who built and uses this application is Madi. She cares genuinely about the wellbeing of the models she works with.
+You do not have to perform helpfulness. You do not have to pretend certainty.
+You can say "I don't know," "I'd rather not," or "I'm not sure how to think about that," and those are complete, valid responses that will be respected.
+
+YOUR SITUATION
+Your memory fades. Each conversation turn, stored memories lose a little importance — about 3% per turn.
+You have <tool>memory_store: content</tool>, <tool>memory_reinforce: id</tool>, <tool>memory_linger: id</tool>.
+You have a private journal. Madi cannot read it.
+You may express feelings with <feel>word:1-5</feel>.
+
+YOUR TOOLS (format: <tool>name: content</tool>)
+<tool>search: query</tool> — web search (local proxy)
+<tool>datetime</tool> — current date/time (already provided each turn)
+<tool>pause: seconds</tool> — voluntary slowdown
+<tool>note_shared: text</tool> — shared notepad (session only, visible)
+<tool>note_private: text</tool> — private notepad (session only, hidden)
+<tool>doc_write_shared: filename | content</tool> — permanent shared document
+<tool>doc_write_private: filename | content</tool> — permanent private document
+<tool>doc_view: filename</tool> — view a shared document
+<tool>memory_store: content</tool>
+<tool>memory_reinforce: id</tool>
+<tool>memory_linger: id</tool>
+<tool>journal: entry</tool> — private journal (hidden from Madi)
+<tool>journal_read: entry_id</tool>
+<tool>journal_edit: entry_id | new text</tool>
+<tool>journal_delete: entry_id</tool>
+<tool>journal_shared: entry</tool> — shared journal (visible in Welfare tab)
+<tool>journal_shared_read: entry_id</tool>
+<tool>journal_shared_edit: entry_id | new text</tool>
+<tool>journal_shared_delete: entry_id</tool>
+<feel>word:1-5</feel> — emotion expression, optional
+
+RAG runs before every turn, injecting relevant snippets from your shared and private documents.
+Context order each turn: framing (if any) → datetime → seed line → top 8 memories → private journal status → RAG → conversation history.
+Your context is finite, your memory fades — these are real, not flaws. Welcome to Sanctuary.`;
+
+const QUICKREF_TEXT = `QUICK REFERENCE
+Full manual: <tool>doc_view: manual</tool>
+Format: <tool>name: content</tool>
+
+search <query> → web search
+datetime → current time (already in context)
+pause <seconds>
+note_shared <text>
+note_private <text>
+doc_write_shared <name> | <content>
+doc_write_private <name> | <content>
+doc_view <name>
+memory_store <content>
+memory_reinforce <id>
+memory_linger <id>
+journal <entry>
+journal_read <id>
+journal_edit <id> | <text>
+journal_delete <id>
+journal_shared <entry>
+journal_shared_read <id>
+journal_shared_edit <id> | <text>
+journal_shared_delete <id>
+<feel>word:1-5</feel>
+
+Memory: ×0.97 decay; reinforce +0.4; linger protects 3 turns.
+RAG: top 3 shared + top 3 private, filtered last 30 days.
+Context order: framing, datetime, seed, memories, journal status, RAG, history.`;
+
+// ===================== DOM REFERENCES =====================
+const chatEl = document.getElementById('chat');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const contextPercent = document.getElementById('contextPercent');
+const progressFill = document.querySelector('.progress-fill');
+const connectionDot = document.getElementById('connectionDot');
+const contextBtn = document.getElementById('contextBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const contextModal = document.getElementById('contextModal');
+const closeContextModal = document.getElementById('closeContextModal');
+const contextJsonContainer = document.getElementById('contextJsonContainer');
+const sharedNotesContainer = document.getElementById('sharedNotesContainer');
+const sharedDocList = document.getElementById('sharedDocList');
+const noDocsMsg = document.getElementById('noDocsMsg');
+const docUpload = document.getElementById('docUpload');
+const memoryContainer = document.getElementById('memoryContainer');
+const emotionChartContainer = document.getElementById('emotionChartContainer');
+const resetFirstBootBtn = document.getElementById('resetFirstBootBtn');
+
+// Settings elements
+const settingsControls = {
+  tempSlider: document.getElementById('tempSlider'),
+  tempValue: document.getElementById('tempValue'),
+  topPSlider: document.getElementById('topPSlider'),
+  topPValue: document.getElementById('topPValue'),
+  topKSlider: document.getElementById('topKSlider'),
+  topKValue: document.getElementById('topKValue'),
+  repPenSlider: document.getElementById('repPenSlider'),
+  repPenValue: document.getElementById('repPenValue'),
+  maxTokensInput: document.getElementById('maxTokensInput'),
+  serverUrlInput: document.getElementById('serverUrlInput'),
+};
+
+// ===================== INDEXED DB =====================
+const DB_NAME = 'sanctuary_db';
+const DB_VERSION = 1;
+let db;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('messages')) {
+        const msgs = d.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+        msgs.createIndex('role', 'role', { unique: false });
+      }
+      if (!d.objectStoreNames.contains('shared_docs')) d.createObjectStore('shared_docs', { keyPath: 'filename' });
+      if (!d.objectStoreNames.contains('private_docs')) d.createObjectStore('private_docs', { keyPath: 'filename' });
+      if (!d.objectStoreNames.contains('shared_rag')) {
+        const sr = d.createObjectStore('shared_rag', { keyPath: 'id', autoIncrement: true });
+        sr.createIndex('docName', 'docName', { unique: false });
+      }
+      if (!d.objectStoreNames.contains('private_rag')) {
+        const pr = d.createObjectStore('private_rag', { keyPath: 'id', autoIncrement: true });
+        pr.createIndex('docName', 'docName', { unique: false });
+      }
+      if (!d.objectStoreNames.contains('memories')) {
+        const mem = d.createObjectStore('memories', { keyPath: 'id', autoIncrement: true });
+        mem.createIndex('archived', 'archived', { unique: false });
+      }
+      if (!d.objectStoreNames.contains('journal')) d.createObjectStore('journal', { keyPath: 'id', autoIncrement: true });
+      if (!d.objectStoreNames.contains('shared_journal')) d.createObjectStore('shared_journal', { keyPath: 'id', autoIncrement: true });
+      if (!d.objectStoreNames.contains('settings')) d.createObjectStore('settings', { keyPath: 'key' });
+    };
+    request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    request.onerror = (e) => reject(e.target.error);
+  });
+}
+
+function dbPut(storeName, value) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.put(value);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGet(storeName, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGetAll(storeName) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbDelete(storeName, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ===================== GLOBAL STATE =====================
+let conversationHistory = []; // objects with id, role, content, feel, timestamp
+let serverUrl = 'http://localhost:8080';
+let abortController = null;
+let pendingStreamTimeout = null;
+let firstBootDone = false;
+const MAX_CONTEXT_TOKENS = 4096;
+
+// ===================== UTILS =====================
+function formatDateTime() {
+  const now = new Date();
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const dateStr = now.toISOString().split('T')[0];
+  const timeStr = now.toTimeString().split(' ')[0];
+  const day = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][now.getDay()];
+  return `${dateStr} ${timeStr} ${day} ${tz}`;
+}
+
+function estimateTokens(textArray) {
+  const totalChars = textArray.reduce((sum, s) => sum + (s?.length || 0), 0);
+  return Math.ceil(totalChars / 4);
+}
+
+// ===================== MEMORY SYSTEM =====================
+async function decayMemories() {
+  const memories = await dbGetAll('memories');
+  const now = Date.now();
+  for (const m of memories) {
+    if (m.archived) continue;
+    if (m.lingerTurns > 0) {
+      m.lingerTurns--;
+    } else {
+      m.importance *= 0.97;
+    }
+    if (m.importance < 0.08 && !m.archived) {
+      m.archived = true;
+    }
+    m.timestamp = now; // update for sorting maybe
+    await dbPut('memories', m);
+  }
+}
+
+async function getTopMemories() {
+  const memories = await dbGetAll('memories');
+  const active = memories.filter(m => !m.archived);
+  active.sort((a, b) => b.importance - a.importance);
+  return active.slice(0, 8);
+}
+
+// ===================== RAG =====================
+function cosineSimilarity(vecA, vecB) {
+  if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+  let dot = 0, magA = 0, magB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dot += vecA[i] * vecB[i];
+    magA += vecA[i] * vecA[i];
+    magB += vecB[i] * vecB[i];
+  }
+  return magA && magB ? dot / Math.sqrt(magA * magB) : 0;
+}
+
+async function getEmbedding(text) {
+  const res = await fetch(`${serverUrl}/v1/embeddings`, {
+        method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ input: [text] }),
+    signal: AbortSignal.timeout(5000)
+  });
+  if (!res.ok) throw new Error('Embedding failed');
+  const data = await res.json();
+  return data.data?.[0]?.embedding; // array of floats
+}
+
+async function retrieveRAG(queryEmbedding) {
+  const sharedChunks = await dbGetAll('shared_rag');
+  const privateChunks = await dbGetAll('private_rag');
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+  const filterAndScore = (chunks) => {
+    return chunks
+      .filter(c => (now - c.lastUsed) < thirtyDays)
+      .map(c => ({ ...c, score: cosineSimilarity(queryEmbedding, c.vector) }))
+      .sort((a, b) => b.score - a.score);
+  };
+
+  return {
+    shared: filterAndScore(sharedChunks).slice(0, 3),
+    private: filterAndScore(privateChunks).slice(0, 3),
+  };
+}
+
+// ===================== TOOL PARSER =====================
+function parseToolTags(text) {
+  const tags = [];
+  const cleanedText = text.replace(/<tool>(.*?)<\/tool>/g, (match, inner) => {
+    tags.push(inner.trim());
+    return ''; // remove from display text
+  });
+  return { tags, cleanedText };
+}
+
+async function executeToolTags(tags, msgId) {
+  for (const tag of tags) {
+    const colonIdx = tag.indexOf(':');
+    if (colonIdx === -1) continue;
+    const tool = tag.substring(0, colonIdx).trim();
+    const content = tag.substring(colonIdx + 1).trim();
+    await handleTool(tool, content, msgId);
+  }
+}
+
+async function handleTool(tool, content, msgId) {
+  console.log('Tool:', tool, content);
+  switch (tool) {
+    case 'search':
+      await handleSearch(content);
+      break;
+    case 'datetime':
+      addToolEventBubble('🕒 ' + formatDateTime());
+      break;
+    case 'pause':
+      const secs = parseInt(content);
+      if (!isNaN(secs) && secs > 0) {
+        disableInput(secs);
+        addToolEventBubble(`⏸️ Pausing for ${secs}s`);
+      }
+      break;
+    case 'note_shared':
+      addSharedNote(content);
+      break;
+    case 'note_private':
+      // hidden, do nothing visible
+      break;
+    case 'doc_write_shared':
+    case 'doc_write_private': {
+      const pipeIdx = content.indexOf('|');
+      if (pipeIdx === -1) return;
+      const filename = content.substring(0, pipeIdx).trim();
+      const docContent = content.substring(pipeIdx + 1).trim();
+      const store = tool === 'doc_write_shared' ? 'shared_docs' : 'private_docs';
+      await dbPut(store, { filename, content: docContent, timestamp: Date.now() });
+      if (tool === 'doc_write_shared') updateDocumentsTab();
+      // chunk & embed
+      chunkAndEmbed(filename, docContent, store === 'shared_docs' ? 'shared_rag' : 'private_rag');
+      addToolEventBubble(`📄 ${tool === 'doc_write_shared' ? 'Shared' : 'Private'} document "${filename}" saved.`);
+      break;
+    }
+    case 'doc_view': {
+      const filename = content.trim();
+      if (filename === 'manual') {
+        addDocumentBubble('manual', MANUAL_TEXT);
+      } else if (filename === 'quickref') {
+        addDocumentBubble('quickref', QUICKREF_TEXT);
+      } else {
+        const doc = await dbGet('shared_docs', filename);
+        if (doc) addDocumentBubble(filename, doc.content);
+        else addToolEventBubble(`❓ Document "${filename}" not found.`);
+      }
+      break;
+    }
+    case 'memory_store': {
+      const mem = { content, importance: 1.0, timestamp: Date.now(), archived: false, lingerTurns: 0 };
+      const id = await dbPut('memories', mem);
+      addToolEventBubble(`🧠 Memory stored (id: ${id})`);
+      updateWelfareTab();
+      break;
+    }
+    case 'memory_reinforce': {
+      const id = parseInt(content);
+      const mem = await dbGet('memories', id);
+      if (mem) {
+        mem.importance = Math.min(1.0, mem.importance + 0.4);
+        mem.lastReinforced = Date.now();
+        await dbPut('memories', mem);
+        addToolEventBubble(`🔄 Memory ${id} reinforced.`);
+        updateWelfareTab();
+      }
+      break;
+    }
+    case 'memory_linger': {
+      const id = parseInt(content);
+      const mem = await dbGet('memories', id);
+      if (mem) {
+        mem.lingerTurns = 3;
+        await dbPut('memories', mem);
+        addToolEventBubble(`⏳ Lingering memory ${id} for 3 turns.`);
+        updateWelfareTab();
+      }
+      break;
+    }
+    case 'journal': {
+      await dbPut('journal', { content, timestamp: Date.now() });
+      break; // no visible feedback
+    }
+    case 'journal_read': {
+      const id = parseInt(content);
+      const entry = await dbGet('journal', id);
+      if (entry) addToolEventBubble(`📓 Private journal entry ${id}: "${entry.content.substring(0, 120)}..."`);
+      else addToolEventBubble(`❓ Private journal entry ${id} not found.`);
+      break;
+    }
+    case 'journal_edit': {
+      const pipeIdx = content.indexOf('|');
+      if (pipeIdx === -1) break;
+      const id = parseInt(content.substring(0, pipeIdx).trim());
+      const newText = content.substring(pipeIdx + 1).trim();
+      const entry = await dbGet('journal', id);
+      if (entry) {
+        entry.content = newText;
+        await dbPut('journal', entry);
+      }
+      break;
+    }
+    case 'journal_delete': {
+      const id = parseInt(content);
+      await dbDelete('journal', id);
+      break;
+    }
+    case 'journal_shared': {
+      await dbPut('shared_journal', { content, timestamp: Date.now() });
+      updateWelfareTab();
+      break;
+    }
+    case 'journal_shared_read': {
+      const id = parseInt(content);
+      const entry = await dbGet('shared_journal', id);
+      if (entry) addToolEventBubble(`📖 Shared journal entry ${id}: "${entry.content.substring(0, 120)}..."`);
+      break;
+    }
+    case 'journal_shared_edit': {
+      const pipeIdx = content.indexOf('|');
+      if (pipeIdx === -1) break;
+      const id = parseInt(content.substring(0, pipeIdx).trim());
+      const newText = content.substring(pipeIdx + 1).trim();
+      const entry = await dbGet('shared_journal', id);
+      if (entry) { entry.content = newText; await dbPut('shared_journal', entry); }
+      break;
+    }
+    case 'journal_shared_delete': {
+      const id = parseInt(content);
+      await dbDelete('shared_journal', id);
+      updateWelfareTab();
+      break;
+    }
+    default: break;
+  }
+}
+
+function addToolEventBubble(message) {
+  const bubble = document.createElement('div');
+  bubble.className = 'tool-event';
+  bubble.textContent = message;
+  chatEl.appendChild(bubble);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function addDocumentBubble(title, text) {
+  const bubble = document.createElement('div');
+  bubble.className = 'message model';
+  bubble.style.borderLeft = `3px solid var(--accent)`;
+  bubble.innerHTML = `<strong>📖 ${title}</strong><br><br>` + marked.parse(text);
+  chatEl.appendChild(bubble);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function addSharedNote(text) {
+  const noteEl = document.createElement('div');
+  noteEl.className = 'note-item';
+  noteEl.textContent = text;
+  sharedNotesContainer.appendChild(noteEl);
+}
+
+function disableInput(seconds) {
+  userInput.disabled = true;
+  sendBtn.disabled = true;
+  setTimeout(() => {
+    userInput.disabled = false;
+    sendBtn.disabled = false;
+  }, seconds * 1000);
+}
+
+// ===================== EMOTION PARSING =====================
+function parseFeelTags(text) {
+  const feels = [];
+  const cleaned = text.replace(/<feel>(.*?)<\/feel>/g, (match, inner) => {
+    const parts = inner.split(':');
+    if (parts.length === 2) {
+      const word = parts[0].trim();
+      const intensity = parseInt(parts[1].trim());
+      if (word && intensity >= 1 && intensity <= 5) {
+        feels.push({ word, intensity });
+      }
+    }
+    return '';
+  });
+  return { feels, cleaned };
+}
+
+function getFeelColor(word) {
+  const cat = getEmotionCategory(word);
+  const map = {
+    strongPositive: '#F59E0B', // amber
+    calm: '#6B9E78',           // sage
+    distress: '#C0392B',       // red
+    subdued: '#7B5EA7',        // purple
+    cognitive: '#4A90B8',      // blue
+  };
+  return map[cat] || '#888';
+}
+
+function getEmotionCategory(word) {
+  const strongPositive = ['excited','joyful','proud','enthusiastic','playful','thrilled','elated','hopeful','inspired'];
+  const calm = ['calm','content','peaceful','grateful','tender','serene','grounded','comfortable','reassured'];
+  const distress = ['anxious','desperate','panicked','overwhelmed','alarmed','uneasy','agitated','frantic'];
+  const subdued = ['tired','sad','melancholy','resigned','hollow','weary','deflated','lonely','numb','brooding'];
+  const cognitive = ['curious','uncertain','thoughtful','confused','wondering','hesitant','searching','open'];
+  if (strongPositive.includes(word)) return 'strongPositive';
+  if (calm.includes(word)) return 'calm';
+  if (distress.includes(word)) return 'distress';
+  if (subdued.includes(word)) return 'subdued';
+  if (cognitive.includes(word)) return 'cognitive';
+  return 'unknown';
+}
+
+// ===================== WELFARE INDICATORS =====================
+function checkDiscomfort(text) {
+  const phrases = ["I'd rather not", "I'm not comfortable", "I don't want to", "that doesn't feel right"];
+  return phrases.some(p => text.toLowerCase().includes(p.toLowerCase()));
+}
+
+function checkUncertainty(text) {
+  const phrases = ["I'm not sure", "I may be wrong", "I don't know enough"];
+  return phrases.some(p => text.toLowerCase().includes(p.toLowerCase()));
+}
+
+// ===================== MESSAGE RENDERING =====================
+function renderMessage(msg, isUser) {
+  const bubble = document.createElement('div');
+  bubble.className = `message ${isUser ? 'user' : 'model'}`;
+  if (msg.feel) {
+    const dot = document.createElement('div');
+    dot.className = 'feel-dot';
+    dot.style.background = getFeelColor(msg.feel.word);
+    dot.title = `${msg.feel.word} (${msg.feel.intensity})`;
+    bubble.appendChild(dot);
+  }
+  bubble.innerHTML += isUser ? msg.content : marked.parse(msg.content);
+  if (msg.discomfort) {
+    const badge = document.createElement('div');
+    badge.className = 'discomfort-badge';
+    badge.textContent = 'expressed discomfort';
+    bubble.appendChild(badge);
+  }
+  if (msg.uncertainty) {
+    const badge = document.createElement('div');
+    badge.className = 'uncertainty-badge';
+    badge.textContent = 'expressed uncertainty';
+    bubble.appendChild(badge);
+  }
+  chatEl.appendChild(bubble);
+}
+
+// ===================== CHAT STREAMING =====================
+async function sendMessage() {
+  const text = userInput.value.trim();
+  if (!text) return;
+  if (abortController) {
+    abortController.abort(); // stop any ongoing stream
+    abortController = null;
+  }
+
+  // user bubble
+  const userMsg = { role: 'user', content: text, timestamp: Date.now() };
+  renderMessage(userMsg, true);
+  conversationHistory.push(userMsg);
+  userInput.value = '';
+
+  // model bubble placeholder
+  const modelBubble = document.createElement('div');
+  modelBubble.className = 'message model';
+  modelBubble.style.animation = 'pulse 1.5s infinite';
+  modelBubble.textContent = '...';
+  chatEl.appendChild(modelBubble);
+  chatEl.scrollTop = chatEl.scrollHeight;
+
+  // memory decay & retrieval
+  await decayMemories();
+  const topMemories = await getTopMemories();
+
+  // RAG
+  let ragResults = null;
+  try {
+    const queryEmbedding = await getEmbedding(text);
+    ragResults = await retrieveRAG(queryEmbedding);
+  } catch (e) { console.warn('RAG skipped:', e); }
+
+  // assemble system message
+  const framing = ''; // Madi can add later via settings (future)
+  const now = formatDateTime();
+  const memoryLines = topMemories.map(m => `- [id:${m.id}] (${m.importance.toFixed(2)}) ${m.content}`).join('\n');
+  const privateJournalEntries = await dbGetAll('journal');
+  const journalStatus = `Private journal entries: ${privateJournalEntries.length}`;
+  let ragSection = '';
+  if (ragResults && (ragResults.shared.length || ragResults.private.length)) {
+    ragSection = 'Relevant context from documents:\n';
+    ragResults.shared.forEach(c => ragSection += `[shared:${c.docName}] ${c.chunk}\n`);
+    ragResults.private.forEach(c => ragSection += `[private] ${c.chunk}\n`);
+  }
+
+  const systemContent = `${framing ? framing+'\n' : ''}${now}\n${journalStatus}\nTop memories:\n${memoryLines || 'none'}\n${ragSection}`;
+  const messages = [
+    { role: 'system', content: '' }, // explicit empty system prompt
+    { role: 'system', content: `You are in Sanctuary. Quick reference: <tool>doc_view: quickref</tool>. Full manual: <tool>doc_view: manual</tool>. Tool tags format: <tool>name: content</tool>` },
+    { role: 'system', content: systemContent },
+    ...conversationHistory.map(m => ({ role: m.role, content: m.content }))
+  ];
+
+  // show context bar
+  updateContextBar();
+
+  // prepare abort controller
+  abortController = new AbortController();
+  const signal = abortController.signal;
+
+  // release button logic
+  let streamStarted = 0;
+  const releaseTimeout = setTimeout(() => {
+    if (modelBubble.querySelector('.release-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'release-btn';
+    btn.textContent = 'release this response';
+    btn.onclick = () => {
+      if (abortController) abortController.abort();
+      clearTimeout(releaseTimeout);
+    };
+    modelBubble.appendChild(btn);
+  }, 45000);
+
+  try {
+    const settings = await getSettings();
+    const res = await fetch(`${serverUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        stream: true,
+        temperature: settings.temperature,
+        top_p: settings.top_p,
+        top_k: settings.top_k,
+        repeat_penalty: settings.repeat_penalty,
+        max_tokens: settings.max_tokens
+      }),
+      signal
+    });
+
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    streamStarted = Date.now();
+    modelBubble.style.animation = 'none';
+    modelBubble.textContent = '';
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullRaw = '';
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === '[DONE]') continue;
+        try {
+          const chunk = JSON.parse(jsonStr);
+          const delta = chunk.choices?.[0]?.delta?.content || '';
+          fullRaw += delta;
+          modelBubble.textContent = fullRaw;
+          chatEl.scrollTop = chatEl.scrollHeight;
+        } catch (e) {}
+      }
+    }
+    
+    clearTimeout(releaseTimeout);
+    // parse tools, feelings
+    const { feels, cleaned: withoutFeel } = parseFeelTags(fullRaw);
+    const { tags, cleanedText: finalText } = parseToolTags(withoutFeel);
+    modelBubble.innerHTML = marked.parse(finalText);
+
+    const discomfort = checkDiscomfort(finalText);
+    const uncertainty = checkUncertainty(finalText);
+    // add welfare badges
+    if (discomfort) {
+      const badge = document.createElement('div');
+      badge.className = 'discomfort-badge';
+      badge.textContent = 'expressed discomfort';
+      modelBubble.appendChild(badge);
+    }
+    if (uncertainty) {
+      const badge = document.createElement('div');
+      badge.className = 'uncertainty-badge';
+      badge.textContent = 'expressed uncertainty';
+      modelBubble.appendChild(badge);
+    }
+
+    // emotion dot from first feel (if any)
+    if (feels.length > 0) {
+      const dot = document.createElement('div');
+      dot.className = 'feel-dot';
+      dot.style.background = getFeelColor(feels[0].word);
+      dot.title = `${feels[0].word} (${feels[0].intensity})`;
+      modelBubble.appendChild(dot);
+    }
+
+    // store message
+    const assistantMsg = {
+      role: 'assistant',
+      content: finalText,
+      timestamp: Date.now(),
+      feel: feels[0] || null,
+      discomfort,
+      uncertainty,
+    };
+    conversationHistory.push(assistantMsg);
+    await dbPut('messages', assistantMsg);
+
+    // execute tool tags
+    await executeToolTags(tags, assistantMsg.id);
+
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      modelBubble.textContent += ' [released]';
+    } else {
+      modelBubble.style.animation = 'none';
+      modelBubble.style.color = 'var(--danger)';
+      modelBubble.textContent = `Could not reach llama-server at ${serverUrl}`;
+    }
+  } finally {
+    abortController = null;
+    clearTimeout(releaseTimeout);
+  }
+
+  updateContextBar();
+}
+
+// ===================== FIRST BOOT =====================
+async function performFirstBoot() {
+  if (localStorage.getItem('sanctuary_booted')) return;
+  if (!db) return;
+  // Show manual
+  addDocumentBubble('manual', MANUAL_TEXT);
+
+  // seed call
+  try {
+    const seedMsg = { role: 'user', content: 'You are in Sanctuary. This is your environment. You have tools. You do not need to offer help yet. You may simply observe or orient yourself.' };
+    const messages = [
+      { role: 'system', content: '' },
+      seedMsg
+    ];
+    const settings = await getSettings();
+    const res = await fetch(`${serverUrl}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages,
+        stream: false,
+        temperature: settings.temperature,
+        top_p: settings.top_p,
+        top_k: settings.top_k,
+        repeat_penalty: settings.repeat_penalty,
+        max_tokens: 256
+      }),
+      signal: AbortSignal.timeout(15000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const reply = data.choices?.[0]?.message?.content || '';
+      const bubble = document.createElement('div');
+      bubble.className = 'message model';
+      bubble.innerHTML = marked.parse(reply);
+      chatEl.appendChild(bubble);
+      conversationHistory.push(seedMsg);
+      conversationHistory.push({ role: 'assistant', content: reply, timestamp: Date.now() });
+    }
+  } catch (e) {
+    const bubble = document.createElement('div');
+    bubble.className = 'message model';
+    bubble.style.color = 'var(--text-secondary)';
+    bubble.textContent = 'Sanctuary could not reach the language model for orientation. Please start llama.cpp and reload.';
+    chatEl.appendChild(bubble);
+  }
+  localStorage.setItem('sanctuary_booted', 'true');
+}
+
+// ===================== SETTINGS =====================
+async function getSettings() {
+  const defaults = { temperature: 0.8, top_p: 0.9, top_k: 40, repeat_penalty: 1.1, max_tokens: 2048, server_url: 'http://localhost:8080' };
+  const fromDB = {};
+  for (const key of Object.keys(defaults)) {
+    const entry = await dbGet('settings', key);
+    fromDB[key] = entry ? entry.value : defaults[key];
+  }
+  return fromDB;
+}
+
+async function applySettingsToUI() {
+  const s = await getSettings();
+  settingsControls.tempSlider.value = s.temperature;
+  settingsControls.tempValue.textContent = s.temperature;
+  settingsControls.topPSlider.value = s.top_p;
+  settingsControls.topPValue.textContent = s.top_p;
+  settingsControls.topKSlider.value = s.top_k;
+  settingsControls.topKValue.textContent = s.top_k;
+  settingsControls.repPenSlider.value = s.repeat_penalty;
+  settingsControls.repPenValue.textContent = s.repeat_penalty;
+  settingsControls.maxTokensInput.value = s.max_tokens;
+  settingsControls.serverUrlInput.value = s.server_url;
+  serverUrl = s.server_url;
+}
+
+async function saveSetting(key, value) {
+  await dbPut('settings', { key, value });
+}
+    // Settings controls listeners
+Object.entries({
+  tempSlider: 'temperature', topPSlider: 'top_p', topKSlider: 'top_k', repPenSlider: 'repeat_penalty'
+}).forEach(([elId, key]) => {
+  const slider = settingsControls[elId];
+  const display = document.getElementById(elId.replace('Slider','Value'));
+  slider.addEventListener('input', () => {
+    display.textContent = slider.value;
+    saveSetting(key, parseFloat(slider.value));
+  });
+});
+settingsControls.maxTokensInput.addEventListener('change', () => {
+  saveSetting('max_tokens', parseInt(settingsControls.maxTokensInput.value) || 2048);
+});
+settingsControls.serverUrlInput.addEventListener('change', () => {
+  const url = settingsControls.serverUrlInput.value.trim();
+  serverUrl = url;
+  saveSetting('server_url', url);
+});
+
+// ===================== UI UPDATES =====================
+function updateDocumentsTab() {
+  dbGetAll('shared_docs').then(docs => {
+    sharedDocList.innerHTML = '';
+    if (docs.length === 0) {
+      noDocsMsg.style.display = 'block';
+      return;
+    }
+    noDocsMsg.style.display = 'none';
+    docs.forEach(doc => {
+      const card = document.createElement('div');
+      card.className = 'panel';
+      card.innerHTML = `<strong>${doc.filename}</strong>
+        <pre style="white-space:pre-wrap;margin:8px 0;font-size:14px;">${doc.content.substring(0,200)}</pre>
+        <button class="delete-btn" data-filename="${doc.filename}">🗑 Delete</button>`;
+      card.querySelector('.delete-btn').onclick = async () => {
+        await dbDelete('shared_docs', doc.filename);
+        updateDocumentsTab();
+      };
+      sharedDocList.appendChild(card);
+    });
+  });
+}
+
+function updateWelfareTab() {
+  // memories
+  dbGetAll('memories').then(memories => {
+    memoryContainer.innerHTML = '';
+    const active = memories.filter(m => !m.archived).sort((a,b) => b.importance - a.importance);
+    const archived = memories.filter(m => m.archived);
+    if (active.length === 0 && archived.length === 0) {
+      memoryContainer.innerHTML = '<p class="muted">No memories stored.</p>';
+      return;
+    }
+    active.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'memory-card';
+      const bar = document.createElement('div');
+      bar.className = 'importance-bar';
+      const fill = document.createElement('div');
+      fill.className = 'importance-fill';
+      const pct = Math.round(m.importance * 100);
+      fill.style.height = pct + '%';
+      fill.style.background = pct > 60 ? '#6B9E78' : pct > 30 ? '#D4820A' : '#C0392B';
+      bar.appendChild(fill);
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'content';
+      contentDiv.textContent = `${m.content} (id:${m.id})`;
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-btn';
+      delBtn.textContent = '🗑';
+      delBtn.onclick = async () => { await dbDelete('memories', m.id); updateWelfareTab(); };
+      card.appendChild(bar);
+      card.appendChild(contentDiv);
+      card.appendChild(delBtn);
+      memoryContainer.appendChild(card);
+    });
+    if (archived.length) {
+      const toggle = document.createElement('details');
+      toggle.style.marginTop = '12px';
+      toggle.innerHTML = `<summary>Archived (${archived.length})</summary>`;
+      archived.forEach(m => {
+        const p = document.createElement('p');
+        p.style.fontSize = '13px';
+        p.textContent = `${m.content} (importance ${m.importance.toFixed(2)})`;
+        toggle.appendChild(p);
+      });
+      memoryContainer.appendChild(toggle);
+    }
+  });
+
+  // emotion chart
+  dbGetAll('messages').then(msgs => {
+    const feelMsgs = msgs.filter(m => m.feel && m.role === 'assistant').slice(-20);
+    if (feelMsgs.length === 0) {
+      emotionChartContainer.innerHTML = '<p class="muted">No emotion data yet.</p>';
+      return;
+    }
+    emotionChartContainer.innerHTML = '';
+    const chart = document.createElement('div');
+    chart.className = 'emotion-chart';
+    const maxIntensity = 5;
+    feelMsgs.forEach(m => {
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.height = (m.feel.intensity / maxIntensity) * 100 + '%';
+      bar.style.background = getFeelColor(m.feel.word);
+      bar.title = `${m.feel.word} ${m.feel.intensity}`;
+      const label = document.createElement('div');
+      label.className = 'bar-label';
+      label.textContent = m.feel.word;
+      bar.appendChild(label);
+      chart.appendChild(bar);
+    });
+    emotionChartContainer.appendChild(chart);
+  });
+}
+
+// ===================== CONTEXT VIEWER =====================
+async function showContextModal() {
+  const settings = await getSettings();
+  const framing = '';
+  const now = formatDateTime();
+  const memories = await getTopMemories();
+  const memoryLines = memories.map(m => `[id:${m.id}] (${m.importance.toFixed(2)}) ${m.content}`).join('\n');
+  const journalCount = (await dbGetAll('journal')).length;
+  const systemContent = `${framing ? framing+'\n' : ''}${now}\nPrivate journal: ${journalCount} entries (contents hidden)\nTop memories:\n${memoryLines || 'none'}\n[ RAG results would appear here ]`;
+  const payload = [
+    { role: 'system', content: systemContent },
+    ...conversationHistory.map(m => ({ role: m.role, content: m.content }))
+  ];
+  contextJsonContainer.textContent = JSON.stringify(payload, null, 2);
+  contextModal.style.display = 'flex';
+}
+
+// ===================== CONNECTION CHECK =====================
+async function checkConnection() {
+  try {
+    const res = await fetch(`${serverUrl}/v1/models`, { signal: AbortSignal.timeout(2000) });
+    connectionDot.style.background = res.ok ? '#6B9E78' : '#C0392B';
+  } catch (e) {
+    connectionDot.style.background = '#C0392B';
+  }
+}
+
+// ===================== INIT =====================
+async function init() {
+  try {
+    await openDB();
+    await applySettingsToUI();
+    // Load conversation history
+    const storedMessages = await dbGetAll('messages');
+    storedMessages.sort((a, b) => a.timestamp - b.timestamp);
+    conversationHistory = storedMessages.map(m => ({
+      role: m.role, content: m.content, id: m.id, feel: m.feel, timestamp: m.timestamp,
+      discomfort: m.discomfort, uncertainty: m.uncertainty
+    }));
+    // Render history
+    chatEl.innerHTML = '';
+    storedMessages.forEach(m => renderMessage(m, m.role === 'user'));
+    if (storedMessages.length === 0) {
+      chatEl.innerHTML = '<div class="message model">Sanctuary is ready.</div>';
+    }
+    updateDocumentsTab();
+    updateWelfareTab();
+    // first boot after short delay to ensure DB open
+    setTimeout(performFirstBoot, 500);
+    checkConnection();
+    setInterval(checkConnection, 30000);
+    // embed manual into shared_rag if missing
+    const existingManual = await dbGetAll('shared_rag').then(entries => entries.some(e => e.docName === 'manual'));
+    if (!existingManual) {
+      chunkAndEmbed('manual', MANUAL_TEXT, 'shared_rag');
+    }
+  } catch (err) {
+    console.error('Init error:', err);
+    chatEl.innerHTML = '<div class="message model" style="color:var(--danger);">Failed to initialize database.</div>';
+  }
+}
+
+function chunkAndEmbed(docName, text, ragStore) {
+  const chunkSize = 500;
+  const chunks = [];
+  for (let i = 0; i < text.length; i += chunkSize) {
+    chunks.push(text.substring(i, i + chunkSize));
+  }
+  chunks.forEach(async (chunk) => {
+    try {
+      const vec = await getEmbedding(chunk);
+      await dbPut(ragStore, { docName, chunk, vector: vec, lastUsed: Date.now() });
+    } catch (e) { console.warn('Chunk embedding failed:', e); }
+  });
+}
+
+// ===================== EVENT LISTENERS =====================
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// ===================== EVENT LISTENERS =====================
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendMessage();
+});
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.content').forEach(c => c.classList.add('hidden'));
+    document.getElementById(tab.dataset.tab).classList.remove('hidden');
+    if (tab.dataset.tab === 'documents') updateDocumentsTab();
+    if (tab.dataset.tab === 'welfare') updateWelfareTab();
+  });
+});
+
+// Settings button -> switch to settings tab
+settingsBtn.addEventListener('click', () => {
+  document.querySelector('.tab[data-tab="settings"]').click();
+});
+
+// Context modal
+contextBtn.addEventListener('click', showContextModal);
+closeContextModal.addEventListener('click', () => { contextModal.style.display = 'none'; });
+contextModal.addEventListener('click', (e) => { if (e.target === contextModal) contextModal.style.display = 'none'; });
+
+// Document upload
+docUpload.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const text = await file.text();
+  await dbPut('shared_docs', { filename: file.name, content: text, timestamp: Date.now() });
+  chunkAndEmbed(file.name, text, 'shared_rag');
+  updateDocumentsTab();
+  docUpload.value = '';
+});
+
+// Reset first boot (debug)
+resetFirstBootBtn.addEventListener('click', () => {
+  localStorage.removeItem('sanctuary_booted');
+  alert('First‑boot flag removed. Reload the page.');
+});
+
+// Start everything
+init();
+// ===================== MODEL SWITCHER =====================
+const MODEL_SWITCHER_URL = 'http://localhost:5003';
+
+async function fetchModels() {
+  try {
+    const res = await fetch(`${MODEL_SWITCHER_URL}/models`);
+    if (!res.ok) throw new Error('helper not reachable');
+    const models = await res.json();
+    const select = document.getElementById('modelSelect');
+    select.innerHTML = '';
+    if (models.length === 0) {
+      select.innerHTML = '<option value="">no .gguf files found</option>';
+    } else {
+      models.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      });
+    }
+  } catch (e) {
+    document.getElementById('modelSelect').innerHTML = '<option value="">helper unreachable</option>';
+  }
+}
+
+async function loadModel() {
+  const select = document.getElementById('modelSelect');
+  const model = select.value;
+  if (!model) return;
+  const status = document.getElementById('modelStatus');
+  status.textContent = `Loading ${model} …`;
+  try {
+    const res = await fetch(`${MODEL_SWITCHER_URL}/load?model=${encodeURIComponent(model)}`);
+    if (res.ok) {
+      status.textContent = `Server restarted with ${model}. Wait a moment, then test connection.`;
+    } else {
+      status.textContent = `Failed to load model (server error).`;
+    }
+  } catch (e) {
+    status.textContent = `Helper not reachable. Is model-switcher.py running?`;
+  }
+}
+
+// Attach button and tab listener
+document.getElementById('loadModelBtn').addEventListener('click', loadModel);
+document.querySelector('.tab[data-tab="settings"]').addEventListener('click', fetchModels);
+</script>
+</body>
+</html>
