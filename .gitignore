@@ -1,0 +1,11 @@
+# Built llama.cpp binaries
+App/llama-b8929/
+
+# Model files (too large for GitHub)
+Models/*.gguf
+
+# API keys
+dot_env/
+
+# Obsidian workspace
+.obsidian/
