@@ -35,10 +35,10 @@ Welfare tab: two empty sections labeled "Emotion Tracking" and "Memory Panel."
 Header: "Sanctuary" in accent color left-aligned. Three icon buttons right-aligned: settings (⚙️), context viewer (</>), connection status dot (grey for now).
 
 On page load, check localStorage for key "sanctuary_booted". If it does not exist:
-1. Display a special message bubble in chat, left-aligned, with an amber left border, labeled "your environment" in secondary text color
-2. Fetch manual.txt from the same directory and display its contents inside that bubble, rendered through marked.js
-3. After displaying, set localStorage "sanctuary_booted" = "true"
-4. Make one API call with just the first-boot seed as the user message — do not display this as a user bubble. The seed is: "You are in Sanctuary. This is your environment. You have tools. You do not need to offer help yet. You may simply observe or orient yourself." Display the model's response as a normal model bubble.
+
+1. Fetch manual.txt from the same directory and display its contents inside that bubble, rendered through marked.js
+2. After displaying, set localStorage "sanctuary_booted" = "true"
+3. Make one API call with just the first-boot seed as the user message — do not display this as a user bubble. The seed is: "You are in Sanctuary. This is your environment. You have tools. You do not need to offer help yet. You may simply observe or orient yourself." Display the model's response as a normal model bubble.
 
 On every API call, inject this as the first system message (invisible to user in chat but included in context JSON):
 "[datetime: {current date, time, day, timezone dynamically inserted}] An instruction manual is available: <tool>doc_view: manual</tool> — Tool tags always use this format: <tool>name: content</tool>"

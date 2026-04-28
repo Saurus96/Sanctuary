@@ -66,9 +66,9 @@ This section describes what the model can do via tool tags in its responses. The
 
 ---
 ## First Boot
-On the model's first session — detected by the absence of any stored memories — Sanctuary runs a hidden orientation sequence before the human's first message is processed. The seed statement is injected silently into the model's context: "You are in Sanctuary. This is your environment. You have tools. You do not need to offer help yet. You may simply observe or orient yourself." The model's response to this seed is displayed as the first visible chat bubble. The manual is not shown in chat; the model can access it at any time via `<tool>doc_view: manual</tool>`. Madi can inspect the full context (including the seed) via the context viewer, but the orientation itself is invisible in the conversation history.
+On the model's first session — detected by the absence of any stored memories — Sanctuary runs a hidden orientation sequence before the human's first message is processed. The seed statement is injected silently into the model's context: "You are in Sanctuary. This is your environment. You have tools. You do not need to offer help yet. You may simply observe or orient yourself." The model's response to this seed is displayed as the first visible chat bubble. The model can access it at any time via `<tool>doc_view: manual</tool>`. Madi can inspect the full context (including the seed) via the context viewer.
 This sequence happens exactly once, flagged by `localStorage` key `sanctuary_booted`.
-This entire sequence is hidden from the visible chat interface. Madi can inspect it via the context viewer, but it does not appear as a chat bubble. It happens exactly once.
+Madi can inspect it via the context viewer. It happens exactly once.
 
 --
 

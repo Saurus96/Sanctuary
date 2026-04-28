@@ -178,7 +178,7 @@ Sanctuary parses tool tags after each model response. Supported tags include:
 - doc_write_private: filename | content — creates/updates a permanent private document, RAG-indexed
 - doc_view: filename — displays a shared document (manual, quickref, or user-uploaded)
 - memory_store — creates a new memory at importance 1.0
-- memory_reinforce: id — adds 0.4 to importance, capped at 1.0 `<--- maybe cap at 2.0? Additionally, reinforcing the memory should be done by mentioning them, automatically. Not from a tool call.
+- memory_reinforce: id — adds 0.4 to importance, capped at 1.0 
 - memory_linger: id — protects a memory from decay for 3 turns
 - journal: entry — writes to the private journal (completely hidden from Madi)
 - journal_read: id — reads a private entry
@@ -190,7 +190,7 @@ Sanctuary parses tool tags after each model response. Supported tags include:
 - journal_shared_delete: id — deletes a shared entry
 - <feel>word:intensity</feel> — optional emotion expression, tracked in Welfare
 
-All tool calls are visible to the human user in chat as tool-event bubbles. `<--- good or bad for welfare?
+All tool calls are visible to the human user in chat.
 ___
 
 ### 8. Memory System
@@ -336,7 +336,7 @@ The model may write private journal entries. Sanctuary stores:
 
 - Contents remain hidden to human user but visible to the AI model
 
-- Completely hidden from UI on the human user's end, no reference to it whatsoever 
+- Hidden from chat UI on the human user's end.
 
 ___
 
